@@ -1,53 +1,80 @@
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/user.dart';
 
-/**
- * Pattern Singleton:
- * Pour avoir une seule instance
- */
 class StorageService {
-  //===== Singleton ==========
-  /// Instance Unique (privee)
   static StorageService? _instance;
 
-  /// Getter pour acceder a l'instance
   static StorageService get instance {
     _instance ??= StorageService._();
     return _instance!;
   }
 
-  /// Constructeur prive
   StorageService._();
 
-  //===== SharedPreferences ==========
-  /**
-   * SharedPreferences utilise des opérations asynchrones
-   * car il lit/ecrtit sur le disque
-   *
-   * Le mot-cle await attend que l'operation se termine
-   * La fonction doit etre marque async et retourner un Future
-   * Les variables doivent être marqué par late
-   */
   late SharedPreferences _prefs;
-
-  /// Indicateur d'initialisation
   bool _initialized = false;
 
   Future<void> init() async {
-    if(_initialized) return;
+    if (_initialized) return;
     _prefs = await SharedPreferences.getInstance();
     _initialized = true;
   }
 
-  // ======== Cles de Stockage =========
-  static const String _keyOnboardingConmplete = 'onboarding_complete';
+  // ======== Clés de Stockage =========
+  static const String _keyOnboardingComplete = 'onboarding_complete';
+  static const String _keyUsers = 'users';
+  static const String _keyCurrentUser = 'current_user';
 
-
+  // ======== Onboarding =========
   bool get isOnboardingComplete {
-    return _prefs.getBool(_keyOnboardingConmplete) ?? false;
+    return _prefs.getBool(_keyOnboardingComplete) ?? false;
   }
 
   Future<void> setOnboardingComplete(bool value) async {
-    await _prefs.setBool(_keyOnboardingConmplete, value);
+    await _prefs.setBool(_keyOnboardingComplete, value);
   }
 
+  // ======== Users =========
+
+  // Récupérer tous les utilisateurs
+  Future<List<User>> getUsers() async {
+    final String? usersJson = _prefs.getString(_keyUsers);
+    if (usersJson == null) return [];
+
+    final List<dynamic> usersList = jsonDecode(usersJson);
+    return usersList.map((u) => User.fromMap(u)).toList();
+  }
+
+  // Sauvegarder un utilisateur
+  Future<void> saveUser(User user) async {
+    final users = await getUsers();
+    // Vérifie si l'user existe déjà, si oui on le remplace
+    final index = users.indexWhere((u) => u.id == user.id);
+    if (index >= 0) {
+      users[index] = user;
+    } else {
+      users.add(user);
+    }
+    await _prefs.setString(_keyUsers, jsonEncode(
+        users.map((u) => u.toMap()).toList()
+    ));
+  }
+
+  // Sauvegarder l'utilisateur connecté
+  Future<void> saveCurrentUser(User user) async {
+    await _prefs.setString(_keyCurrentUser, jsonEncode(user.toMap()));
+  }
+
+  // Récupérer l'utilisateur connecté
+  Future<User?> getCurrentUser() async {
+    final String? userJson = _prefs.getString(_keyCurrentUser);
+    if (userJson == null) return null;
+    return User.fromMap(jsonDecode(userJson));
+  }
+
+  // Supprimer l'utilisateur connecté (déconnexion)
+  Future<void> clearCurrentUser() async {
+    await _prefs.remove(_keyCurrentUser);
+  }
 }
