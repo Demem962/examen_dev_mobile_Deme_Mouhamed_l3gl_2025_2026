@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:sunu_task/core/constants/app_strings.dart';
-import 'package:sunu_task/screens/home/home_screen.dart';
+import 'package:sunu_task/screens/auth/login_screen.dart';
 import 'package:sunu_task/screens/onboarding/onboarding_screen.dart';
 import 'package:sunu_task/services/storage_service.dart';
 
@@ -59,32 +59,24 @@ class _SplashScreenState extends State<SplashScreen> {
     if(!mounted) return;
     final bool onboardingComplete = StorageService.instance.isOnboardingComplete;
 
-    /*Navigator.pushReplacement(context,
-      MaterialPageRoute<void>(
-      builder: (context) => onboardingComplete
-          ? const HomeScreen()
-          : const OnboardingScreen(),
-    ),
-    );*/
-
-    // Navigation avec animation
     Navigator.pushReplacement(
         context,
         PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-          onboardingComplete
-              ? const HomeScreen()
-              : const OnboardingScreen(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+            onboardingComplete
+                ? const LoginScreen()  // ← changé
+                : const OnboardingScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
                 opacity: animation,
-              child: child,
-            );
-          },
-          transitionDuration: Duration(milliseconds: 300)
+                child: child,
+              );
+            },
+            transitionDuration: Duration(milliseconds: 300)
         )
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
