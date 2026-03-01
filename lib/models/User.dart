@@ -42,8 +42,8 @@ class User {
    return User(
        id: id ?? this.id,
        name: name ?? this.name,
-       email: email ?? this.name,
-       password: password ?? this.name,
+       email: email ?? this.email,
+       password: password ?? this.password,
        avatar: avatar ?? this.avatar,
        createdAt: createdAt ?? this.createdAt
    );
@@ -60,7 +60,7 @@ class User {
      'email': email,
      'password': password,
      'avatar': avatar,
-     'createdAt': createdAt
+     'createdAt': createdAt.toIso8601String()
    };
  }
 
