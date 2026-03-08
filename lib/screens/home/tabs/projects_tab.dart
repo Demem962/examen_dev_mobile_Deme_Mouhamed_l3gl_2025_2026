@@ -11,13 +11,13 @@ import '../../projects/project_detail_screen.dart';
 class ProjectsTab extends StatelessWidget {
   final AuthProvider authProvider;
   final ProjectProvider projectProvider;
-  final TaskProvider taskProvider; // ← ajouté
+  final TaskProvider taskProvider;
 
   const ProjectsTab({
     super.key,
     required this.authProvider,
     required this.projectProvider,
-    required this.taskProvider, // ← ajouté
+    required this.taskProvider,
   });
 
   @override
