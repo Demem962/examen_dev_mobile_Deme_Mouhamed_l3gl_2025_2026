@@ -33,6 +33,10 @@ class _HomeScreenState extends State<HomeScreen> {
     await _authProvider.init();
     if (_authProvider.currentUser != null) {
       await _projectProvider.loadProjects(_authProvider.currentUser!.id);
+      // Charger les tâches de TOUS les projets
+      for (final project in _projectProvider.projects) {
+        await _taskProvider.loadTasks(project.id);
+      }
     }
   }
 
@@ -59,16 +63,12 @@ class _HomeScreenState extends State<HomeScreen> {
             backgroundColor: AppColors.primary,
             foregroundColor: AppColors.white,
           ),
-          // Drawer
           drawer: Drawer(
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                // En-tête avec avatar
                 UserAccountsDrawerHeader(
-                  decoration: const BoxDecoration(
-                    color: AppColors.primary,
-                  ),
+                  decoration: const BoxDecoration(color: AppColors.primary),
                   accountName: Text(user?.name ?? ''),
                   accountEmail: Text(user?.email ?? ''),
                   currentAccountPicture: CircleAvatar(
@@ -85,7 +85,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-                // Items navigation
                 ListTile(
                   leading: const Icon(Icons.dashboard),
                   title: const Text('Dashboard'),
@@ -127,7 +126,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
                 const Divider(),
-                // Déconnexion
                 ListTile(
                   leading: const Icon(Icons.logout, color: AppColors.error),
                   title: Text(
@@ -139,7 +137,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          // Corps avec IndexedStack
           body: IndexedStack(
             index: _currentIndex,
             children: [
@@ -151,6 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ProjectsTab(
                 authProvider: _authProvider,
                 projectProvider: _projectProvider,
+                taskProvider: _taskProvider,
               ),
               TasksTab(
                 taskProvider: _taskProvider,
@@ -164,7 +162,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          // BottomNavigationBar
           bottomNavigationBar: BottomNavigationBar(
             currentIndex: _currentIndex,
             onTap: (index) => setState(() => _currentIndex = index),
@@ -190,22 +187,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          // FAB visible sur Dashboard et Projets
           floatingActionButton: _currentIndex == 0 || _currentIndex == 1
               ? FloatingActionButton(
             backgroundColor: AppColors.primary,
             foregroundColor: AppColors.white,
             onPressed: () {
-              // Navigation vers création projet
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ProjectsTab(
-                    authProvider: _authProvider,
-                    projectProvider: _projectProvider,
-                  ),
-                ),
-              );
+              setState(() => _currentIndex = 1);
             },
             child: const Icon(Icons.add),
           )

@@ -3,6 +3,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/project_provider.dart';
+import '../../../providers/task_provider.dart';
 import '../../../widgets/cards/project_card.dart';
 import '../../projects/project_form_screen.dart';
 import '../../projects/project_detail_screen.dart';
@@ -10,11 +11,13 @@ import '../../projects/project_detail_screen.dart';
 class ProjectsTab extends StatelessWidget {
   final AuthProvider authProvider;
   final ProjectProvider projectProvider;
+  final TaskProvider taskProvider; // ← ajouté
 
   const ProjectsTab({
     super.key,
     required this.authProvider,
     required this.projectProvider,
+    required this.taskProvider, // ← ajouté
   });
 
   @override
@@ -31,11 +34,8 @@ class ProjectsTab extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.folder_open,
-                  size: 80,
-                  color: AppColors.textSecondary,
-                ),
+                const Icon(Icons.folder_open,
+                    size: 80, color: AppColors.textSecondary),
                 const SizedBox(height: 16),
                 const Text(
                   AppStrings.noProjects,
@@ -80,6 +80,7 @@ class ProjectsTab extends StatelessWidget {
                         builder: (_) => ProjectDetailScreen(
                           project: project,
                           projectProvider: projectProvider,
+                          taskProvider: taskProvider,
                         ),
                       ),
                     );

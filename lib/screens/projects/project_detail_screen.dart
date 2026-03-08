@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../models/Projet.dart';
-import '../../models/Task.dart';
+import '../../models/task.dart';
 import '../../providers/project_provider.dart';
 import '../../providers/task_provider.dart';
 import '../../widgets/cards/task_card.dart';
@@ -13,11 +13,13 @@ import 'project_form_screen.dart';
 class ProjectDetailScreen extends StatefulWidget {
   final Project project;
   final ProjectProvider projectProvider;
+  final TaskProvider taskProvider;
 
   const ProjectDetailScreen({
     super.key,
     required this.project,
     required this.projectProvider,
+    required this.taskProvider,
   });
 
   @override
@@ -25,7 +27,6 @@ class ProjectDetailScreen extends StatefulWidget {
 }
 
 class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
-  final TaskProvider _taskProvider = TaskProvider();
   late Project _project;
 
   @override
@@ -36,7 +37,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   }
 
   Future<void> _loadTasks() async {
-    await _taskProvider.loadTasks(_project.id);
+    await widget.taskProvider.loadTasks(_project.id);
   }
 
   Future<void> _deleteProject() async {
@@ -103,16 +104,15 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
         ],
       ),
       body: ListenableBuilder(
-        listenable: _taskProvider,
+        listenable: widget.taskProvider,
         builder: (context, _) {
-          final tasks = _taskProvider.tasks;
-          final taskCounts = _taskProvider.taskCountByStatus;
+          final tasks = widget.taskProvider.tasks;
+          final taskCounts = widget.taskProvider.taskCountByStatus;
 
           return SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // En-tête coloré
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
@@ -138,31 +138,23 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      // Chips statistiques
                       Wrap(
                         spacing: 8,
                         children: [
-                          _buildStatusChip(
-                            'À faire',
-                            taskCounts[TaskStatus.todo] ?? 0,
-                            AppColors.statusTodo,
-                          ),
-                          _buildStatusChip(
-                            'En cours',
-                            taskCounts[TaskStatus.inProgress] ?? 0,
-                            AppColors.statusInProgress,
-                          ),
-                          _buildStatusChip(
-                            'Terminées',
-                            taskCounts[TaskStatus.done] ?? 0,
-                            AppColors.statusDone,
-                          ),
+                          _buildStatusChip('À faire',
+                              taskCounts[TaskStatus.todo] ?? 0,
+                              AppColors.statusTodo),
+                          _buildStatusChip('En cours',
+                              taskCounts[TaskStatus.inProgress] ?? 0,
+                              AppColors.statusInProgress),
+                          _buildStatusChip('Terminées',
+                              taskCounts[TaskStatus.done] ?? 0,
+                              AppColors.statusDone),
                         ],
                       ),
                     ],
                   ),
                 ),
-                // Liste des tâches
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -213,7 +205,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                                     MaterialPageRoute(
                                       builder: (_) => TaskDetailScreen(
                                         task: task,
-                                        taskProvider: _taskProvider,
+                                        taskProvider: widget.taskProvider,
                                       ),
                                     ),
                                   );
@@ -240,7 +232,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               builder: (_) => TaskFormScreen(
                 projectId: _project.id,
                 userId: _project.userId,
-                taskProvider: _taskProvider,
+                taskProvider: widget.taskProvider, // ← ajouté
               ),
             ),
           );
